@@ -45,6 +45,8 @@ const verifyToken = async (req, res, next) => {
 
 };
 
+
+
 async function run() {
     try {
         // Connect the client to the server (optional starting in v4.7)
@@ -54,6 +56,18 @@ async function run() {
         const menusCollection = database.collection("menu");
         const cartsCollection = database.collection("cart");
         const userCollection = database.collection("users");
+
+        // admin check middleware
+        const verifyAdmin = async (req, res, next) => {
+            const email = req.user.email;
+            const query = { email: email };
+            const user = await userCollection.findOne(query);
+            const isAdmin = user?.role === "admin";
+            if (!isAdmin) {
+                return res.status(403).send({ message: 'Forbidden' });
+            }
+            next();
+        };
 
         //jwt auth
         app.post("/jwt", async (req, res) => {
@@ -131,7 +145,7 @@ async function run() {
         });
 
 
-        app.get("/users", verifyToken, async (req, res) => {
+        app.get("/users", verifyToken, verifyAdmin, async (req, res) => {
             const result = await userCollection.find().toArray();
             res.send(result);
         });
@@ -169,11 +183,12 @@ async function run() {
         app.get("/users/admin/:email", verifyToken, async (req, res) => {
             const email = req.params.email;
             const query = { email: email };
-            const result = await userCollection.findOne(query);
-            if (req.user.email !== result.email) {
-                return res.status(401).send({ message: 'Not authorized' });
+            const user = await userCollection.findOne(query);
+            if (req.user.email !== user?.email) {
+                return res.status(403).send({ message: 'Forbidden' });
             }
-            const admin = result.role === "admin";
+            const admin = user.role === "admin";
+            console.log({ admin });
             res.send({ admin });
         });
 
