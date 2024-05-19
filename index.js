@@ -113,6 +113,13 @@ async function run() {
 
         });
 
+        app.post("/menus", async (req, res) => {
+            const menu = req.body;
+            console.log(menu);
+            const result = await menusCollection.insertOne(menu);
+            res.send(result);
+        });
+
         app.post("/carts", async (req, res) => {
             const cart = req.body;
             console.log(cart);
@@ -182,11 +189,11 @@ async function run() {
 
         app.get("/users/admin/:email", verifyToken, async (req, res) => {
             const email = req.params.email;
-            const query = { email: email };
-            const user = await userCollection.findOne(query);
-            if (req.user.email !== user?.email) {
+            if (req.user.email !== email) {
                 return res.status(403).send({ message: 'Forbidden' });
             }
+            const query = { email: email };
+            const user = await userCollection.findOne(query);
             const admin = user.role === "admin";
             console.log({ admin });
             res.send({ admin });
