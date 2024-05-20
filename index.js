@@ -101,6 +101,13 @@ async function run() {
 
         });
 
+        app.get("/menus/:id", async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await menusCollection.findOne(query);
+            res.send(result);
+        });
+
         app.get("/menusCount", async (req, res) => {
             let options = {};
             const query = req.query?.category;
@@ -113,10 +120,49 @@ async function run() {
 
         });
 
-        app.post("/menus", async (req, res) => {
+        app.post("/menus", verifyToken, verifyAdmin, async (req, res) => {
             const menu = req.body;
             console.log(menu);
             const result = await menusCollection.insertOne(menu);
+            res.send(result);
+        });
+
+        app.patch("/menus/:id", async (req, res) => {
+            const id = req.params.id;
+            const menu = req.body;
+            console.log(id, menu);
+            const filter = { _id: new ObjectId(id) };
+            const UpdatedMenu = {
+                $set: {
+                    name: menu.name,
+                    recipe: menu.recipe,
+                    category: menu.category,
+                    price: parseFloat(menu.price),
+                }
+            };
+            const result = await menusCollection.updateOne(filter, UpdatedMenu);
+            res.send(result);
+        });
+
+        app.patch("/menus/image/:id", async (req, res) => {
+            const id = req.params.id;
+            const menu = req.body;
+            console.log(id, menu);
+            const filter = { _id: new ObjectId(id) };
+            const UpdatedMenu = {
+                $set: {
+                    image: menu.image,
+                }
+            };
+            const result = await menusCollection.updateOne(filter, UpdatedMenu);
+            res.send(result);
+        });
+
+
+        app.delete("/menus/:id", verifyToken, verifyAdmin, async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await menusCollection.deleteOne(query);
             res.send(result);
         });
 
@@ -189,7 +235,7 @@ async function run() {
 
         app.get("/users/admin/:email", verifyToken, async (req, res) => {
             const email = req.params.email;
-            if (req.user.email !== email) {
+            if (req.user?.email !== email) {
                 return res.status(403).send({ message: 'Forbidden' });
             }
             const query = { email: email };
