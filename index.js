@@ -56,6 +56,7 @@ async function run() {
         const menusCollection = database.collection("menu");
         const cartsCollection = database.collection("cart");
         const userCollection = database.collection("users");
+        const paymentCollection = database.collection("payments");
 
         // admin check middleware
         const verifyAdmin = async (req, res, next) => {
@@ -258,6 +259,24 @@ async function run() {
             res.send({
                 clientSecret: paymentIntent.client_secret,
             });
+        });
+
+        app.post("/payments", async (req, res) => {
+            const payment = req.body;
+            console.log(payment);
+            const query = {
+                _id: {
+                    $in: payment.cartIds?.map(id => new ObjectId(id))
+                }
+            };
+            const paymentResult = await paymentCollection.insertOne(payment);
+            const deletedResult = await cartsCollection.deleteMany(query);
+            res.send({ paymentResult, deletedResult });
+        });
+
+        app.get("/payments", async (req, res) => {
+            const result = await paymentCollection.find().toArray();
+            res.send(result);
         });
 
 
