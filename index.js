@@ -88,6 +88,7 @@ async function run() {
                 .send({ success: true });
         });
 
+        //menus
         app.get("/menus", async (req, res) => {
             let filter = {};
             const page = parseInt(req.query?.page);
@@ -128,7 +129,7 @@ async function run() {
             res.send(result);
         });
 
-        app.patch("/menus/:id", async (req, res) => {
+        app.patch("/menus/:id", verifyToken, verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const menu = req.body;
             console.log(id, menu);
@@ -145,7 +146,7 @@ async function run() {
             res.send(result);
         });
 
-        app.patch("/menus/image/:id", async (req, res) => {
+        app.patch("/menus/image/:id", verifyToken, verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const menu = req.body;
             console.log(id, menu);
@@ -167,31 +168,36 @@ async function run() {
             res.send(result);
         });
 
-        app.post("/carts", async (req, res) => {
+        app.post("/carts", verifyToken, async (req, res) => {
             const cart = req.body;
             console.log(cart);
             const result = await cartsCollection.insertOne(cart);
             res.send(result);
         });
 
-        app.get("/carts", async (req, res) => {
-            let options = {};
-            const email = req.query?.email;
-            if (email) {
-                options = { userEmail: email };
+        app.get("/carts/:email", verifyToken, async (req, res) => {
+            const email = req.params?.email;
+            if (email !== req.user.email) {
+                return res.status(403).send({ message: 'Forbidden' });
             }
+            const options = { userEmail: email };
             const result = await cartsCollection.find(options).toArray();
             res.send(result);
         });
 
-        app.delete("/carts/:id", async (req, res) => {
+        app.get("/carts", verifyToken, verifyAdmin, async (req, res) => {
+            const result = await cartsCollection.find().toArray();
+            res.send(result);
+        });
+
+        app.delete("/carts/:id", verifyToken, async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) };
             const result = await cartsCollection.deleteOne(query);
             res.send(result);
         });
 
-        app.delete("/carts", async (req, res) => {
+        app.delete("/carts", verifyToken, async (req, res) => {
             const email = req.query?.email;
             const query = { userEmail: email };
             const result = await cartsCollection.deleteMany(query);
@@ -204,7 +210,7 @@ async function run() {
             res.send(result);
         });
 
-        app.put("/users", async (req, res) => {
+        app.put("/users", verifyToken, async (req, res) => {
             const user = req.body;
             console.log(user);
             const filter = { email: user.email };
@@ -220,7 +226,7 @@ async function run() {
             res.send(result);
         });
 
-        app.patch("/users/admin/:id", async (req, res) => {
+        app.patch("/users/admin/:id", verifyToken, verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const user = req.body;
             console.log(id, user);
@@ -247,7 +253,7 @@ async function run() {
         });
 
         // payment intent
-        app.post("/create-payment-intent", async (req, res) => {
+        app.post("/create-payment-intent", verifyToken, async (req, res) => {
             const { price } = req.body;
             const amount = parseInt(price * 100);
             console.log({ amount });
@@ -261,7 +267,7 @@ async function run() {
             });
         });
 
-        app.post("/payments", async (req, res) => {
+        app.post("/payments", verifyToken, async (req, res) => {
             const payment = req.body;
             console.log(payment);
             const query = {
