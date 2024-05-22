@@ -3,6 +3,7 @@ const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 require('dotenv').config();
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express();
 const port = process.env.PORT || 5000;
@@ -44,7 +45,6 @@ const verifyToken = async (req, res, next) => {
     })
 
 };
-
 
 
 async function run() {
@@ -190,7 +190,7 @@ async function run() {
             res.send(result);
         });
 
-        app.delete("/carts/", async (req, res) => {
+        app.delete("/carts", async (req, res) => {
             const email = req.query?.email;
             const query = { userEmail: email };
             const result = await cartsCollection.deleteMany(query);
@@ -243,6 +243,21 @@ async function run() {
             const admin = user.role === "admin";
             console.log({ admin });
             res.send({ admin });
+        });
+
+        // payment intent
+        app.post("/create-payment-intent", async (req, res) => {
+            const { price } = req.body;
+            const amount = parseInt(price * 100);
+            console.log({ amount });
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount: amount,
+                currency: "usd",
+                payment_method_types: ['card']
+            });
+            res.send({
+                clientSecret: paymentIntent.client_secret,
+            });
         });
 
 
