@@ -274,9 +274,16 @@ async function run() {
             res.send({ paymentResult, deletedResult });
         });
 
-        app.get("/payments", async (req, res) => {
-            const result = await paymentCollection.find().toArray();
+        app.get("/payments/:email", verifyToken, async (req, res) => {
+            const email = req.params.email;
+            const query = { email: email };
+            if (email !== req.user.email) {
+                return res.status(403).send({ message: 'Forbidden access' });
+            }
+
+            const result = await paymentCollection.find(query).toArray();
             res.send(result);
+
         });
 
 
