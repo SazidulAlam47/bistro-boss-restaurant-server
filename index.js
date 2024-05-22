@@ -60,10 +60,12 @@ async function run() {
 
         // admin check middleware
         const verifyAdmin = async (req, res, next) => {
-            const email = req.user.email;
+            const email = req.user?.email;
             const query = { email: email };
             const user = await userCollection.findOne(query);
             const isAdmin = user?.role === "admin";
+            console.log({ isAdmin: isAdmin });
+            console.log("check email", email);
             if (!isAdmin) {
                 return res.status(403).send({ message: 'Forbidden' });
             }
@@ -248,7 +250,7 @@ async function run() {
             const query = { email: email };
             const user = await userCollection.findOne(query);
             const admin = user.role === "admin";
-            console.log({ admin });
+
             res.send({ admin });
         });
 
@@ -286,10 +288,81 @@ async function run() {
             if (email !== req.user.email) {
                 return res.status(403).send({ message: 'Forbidden access' });
             }
-
             const result = await paymentCollection.find(query).toArray();
             res.send(result);
 
+        });
+
+        app.get("/payments", verifyToken, verifyAdmin, async (req, res) => {
+            const result = await paymentCollection.find().toArray();
+            res.send(result);
+        });
+
+        // status
+        app.get("/admin-status", verifyToken, verifyAdmin, async (req, res) => {
+            const customers = await userCollection.estimatedDocumentCount();
+            const products = await menusCollection.estimatedDocumentCount();
+            const orders = await paymentCollection.estimatedDocumentCount();
+
+            const result = await paymentCollection.aggregate([
+                {
+                    $group: {
+                        _id: null,
+                        totalRevenue: {
+                            $sum: "$price"
+                        }
+                    }
+                }
+            ]).toArray();
+
+            const revenue = result.length > 0 ? result[0].totalRevenue : 0;
+
+            res.send({ customers, products, orders, revenue });
+        });
+
+        app.get("/admin-order-status", verifyToken, verifyAdmin, async (req, res) => {
+            const result = await paymentCollection.aggregate([
+                {
+                    $unwind: '$menuItemIds'
+                },
+                {
+                    $addFields: {
+                        menuItemIds: {
+                            $toObjectId: '$menuItemIds'
+                        }
+                    }
+                },
+                {
+                    $lookup: {
+                        from: 'menu',
+                        localField: 'menuItemIds',
+                        foreignField: '_id',
+                        as: 'menuItems'
+                    }
+                },
+                {
+                    $unwind: '$menuItems'
+                },
+                {
+                    $group: {
+                        _id: '$menuItems.category',
+                        quantity: { $sum: 1 },
+                        revenue: { $sum: '$menuItems.price' }
+                    }
+                },
+                {
+                    $project: {
+                        _id: 0,
+                        category: '$_id',
+                        quantity: 1,
+                        revenue: 1
+                    }
+                }
+            ]).toArray();
+
+            console.log(result);
+
+            res.send(result);
         });
 
 
