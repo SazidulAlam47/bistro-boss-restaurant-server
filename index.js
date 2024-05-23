@@ -11,8 +11,8 @@ const port = process.env.PORT || 5000;
 //middleware
 app.use(cors({
     origin: [
-        "http://localhost:5173",
-        "https://bistro-boss-restaurant-sazidulalam47.vercel.app/"
+        // "http://localhost:5173",
+        "https://bistro-boss-restaurant-sazidulalam47.vercel.app"
     ],
     credentials: true
 }));
