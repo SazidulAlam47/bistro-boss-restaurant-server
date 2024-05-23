@@ -282,7 +282,7 @@ async function run() {
             res.send({ paymentResult, deletedResult });
         });
 
-        app.get("/payments/:email", verifyToken, async (req, res) => {
+        app.get("/payments/email/:email", verifyToken, async (req, res) => {
             const email = req.params.email;
             const query = { email: email };
             if (email !== req.user.email) {
@@ -290,13 +290,76 @@ async function run() {
             }
             const result = await paymentCollection.find(query).toArray();
             res.send(result);
-
         });
 
         app.get("/payments", verifyToken, verifyAdmin, async (req, res) => {
             const result = await paymentCollection.find().toArray();
             res.send(result);
         });
+
+        app.get("/payments/:id", verifyToken, async (req, res) => {
+            const id = req.params.id;
+
+            //check admin
+            const email = req.user?.email;
+            const queryAdmin = { email: email };
+            const user = await userCollection.findOne(queryAdmin);
+            const admin = user?.role === "admin";
+            console.log({ admin: admin });
+
+            const query = { _id: new ObjectId(id) };
+            const result = await paymentCollection.findOne(query);
+
+            if (req.user.email !== result.email && !admin) {
+                return res.status(403).send({ message: 'Forbidden access' });
+            }
+
+            res.send(result);
+        });
+
+        app.get("/order-items/:orderId", verifyToken, async (req, res) => {
+            const orderId = req.params.orderId;
+
+            //check admin
+            const email = req.user?.email;
+            const queryAdmin = { email: email };
+            const user = await userCollection.findOne(queryAdmin);
+            const admin = user?.role === "admin";
+            console.log({ admin: admin });
+
+            const query = { _id: new ObjectId(orderId) };
+            const options = {
+                projection: { menuItemIds: 1, email: 1 },
+            };
+            const order = await paymentCollection.findOne(query, options);
+            if (req.user.email !== order.email && !admin) {
+                return res.status(403).send({ message: 'Forbidden access' });
+            }
+            const menuItemIdsObj = order.menuItemIds?.map(id => new ObjectId(id));
+            const orderOption = {
+                _id: {
+                    $in: menuItemIdsObj
+                }
+            }
+            const orderedItems = await menusCollection.find(orderOption).toArray();
+            res.send(orderedItems);
+        });
+
+        app.patch("/orders/status/:id", verifyToken, verifyAdmin, async (req, res) => {
+            const id = req.params.id;
+            console.log('update status');
+            const payment = req.body;
+            console.log(id, payment);
+            const filter = { _id: new ObjectId(id) };
+            const UpdatedPayment = {
+                $set: {
+                    status: payment.status,
+                }
+            };
+            const result = await paymentCollection.updateOne(filter, UpdatedPayment);
+            res.send(result);
+        });
+
 
         // status
         app.get("/admin-status", verifyToken, verifyAdmin, async (req, res) => {
@@ -359,8 +422,6 @@ async function run() {
                     }
                 }
             ]).toArray();
-
-            console.log(result);
 
             res.send(result);
         });
