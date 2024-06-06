@@ -5,6 +5,10 @@ const cookieParser = require('cookie-parser');
 require('dotenv').config();
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const formData = require('form-data');
+const Mailgun = require('mailgun.js');
+const mailgun = new Mailgun(formData);
+const mg = mailgun.client({ username: 'api', key: process.env.MAILGUN_API_KEY });
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -283,6 +287,25 @@ async function run() {
             };
             const paymentResult = await paymentCollection.insertOne(payment);
             const deletedResult = await cartsCollection.deleteMany(query);
+
+            // send email to user
+            mg.messages.create('sandboxbd823edc3f8b4d98b09b3571eca206d6.mailgun.org', {
+                from: "Bistro boss <bistroboss@sandboxbd823edc3f8b4d98b09b3571eca206d6.mailgun.org>",
+                to: ["anik55883@gmail.com"],
+                subject: "Bistro Boss Order confirmation",
+                text: "Testing some Mailgun awesomness!",
+                html: `
+                    <div>
+                        <h1>Thank you for your order!</h1>
+                        <p>Your order has been placed successfully.</p>
+                        <p>your Transaction ID : ${payment.tnxId} </p>
+                        <h3>We will send your Food very soon</h3>
+                    </div>
+                `
+            })
+                .then(msg => console.log(msg)) // logs response data
+                .catch(err => console.error(err)); // logs any error
+
             res.send({ paymentResult, deletedResult });
         });
 
