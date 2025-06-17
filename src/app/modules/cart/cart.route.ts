@@ -10,6 +10,6 @@ router.post("/", verifyToken, CartController.addToCart);
 router.get("/:email", verifyToken, CartController.getUserCart);
 router.get("/", verifyToken, verifyAdmin, CartController.getAllCarts);
 router.delete("/:id", verifyToken, CartController.deleteCartItem);
-router.delete("/", verifyToken, CartController.deleteUserCart);
+router.delete("/email/:email", verifyToken, CartController.deleteUserCart);
 
 export default router;

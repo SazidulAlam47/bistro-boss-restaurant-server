@@ -29,7 +29,7 @@ const deleteCartItem = catchAsync(async (req: Request, res: Response) => {
 });
 
 const deleteUserCart = catchAsync(async (req: Request, res: Response) => {
-    const email = req.query?.email as string;
+    const email = req.params?.email as string;
     const result = await CartService.deleteUserCart(email);
     res.send(result);
 });
