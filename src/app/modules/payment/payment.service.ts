@@ -22,13 +22,13 @@ const getAllPayments = async () => {
 };
 
 const getPaymentById = async (id: string) => {
-    const query = { _id: new ObjectId(id) } as any;
+    const query = { _id: new ObjectId(id) };
     const result = await paymentCollection.findOne(query);
     return result;
 };
 
 const getOrderItems = async (orderId: string) => {
-    const query = { _id: new ObjectId(orderId) } as any;
+    const query = { _id: new ObjectId(orderId) };
     const payment = await paymentCollection.findOne(query);
 
     if (!payment) {
@@ -40,7 +40,7 @@ const getOrderItems = async (orderId: string) => {
         .find({
             _id: {
                 $in: payment.menuItemIds.map((id) => new ObjectId(id)),
-            } as any,
+            },
         })
         .toArray();
 
@@ -51,7 +51,7 @@ const updatePaymentStatus = async (
     id: string,
     status: "pending" | "completed" | "cancelled"
 ) => {
-    const filter = { _id: new ObjectId(id) } as any;
+    const filter = { _id: new ObjectId(id) };
     const updateDoc = {
         $set: {
             status: status,
@@ -61,19 +61,10 @@ const updatePaymentStatus = async (
     return result;
 };
 
-const getPaymentStats = async () => {
-    const result = await paymentCollection
-        .aggregate([
-            {
-                $group: {
-                    _id: null,
-                    totalRevenue: { $sum: "$price" },
-                    totalOrders: { $sum: 1 },
-                },
-            },
-        ])
-        .toArray();
-    return result[0] || { totalRevenue: 0, totalOrders: 0 };
+const deletePayment = async (id: string) => {
+    const filter = { _id: new ObjectId(id) };
+    const result = await paymentCollection.deleteOne(filter);
+    return result;
 };
 
 export const PaymentService = {
@@ -83,5 +74,5 @@ export const PaymentService = {
     getPaymentById,
     getOrderItems,
     updatePaymentStatus,
-    getPaymentStats,
+    deletePayment,
 };

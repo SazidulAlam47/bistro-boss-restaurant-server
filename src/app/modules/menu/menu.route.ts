@@ -2,6 +2,8 @@ import { Router } from "express";
 import { MenuController } from "./menu.controller";
 import { verifyToken } from "../../middlewares/auth.middleware";
 import { verifyAdmin } from "../../middlewares/admin.middleware";
+import { MenuValidations } from "./menu.validation";
+import validateRequest from "../../middlewares/validateRequest";
 
 const router = Router();
 
@@ -11,7 +13,13 @@ router.get("/count", MenuController.getMenusCount);
 router.get("/:id", MenuController.getMenuById);
 
 // Protected routes
-router.post("/", verifyToken, verifyAdmin, MenuController.createMenu);
+router.post(
+    "/",
+    validateRequest(MenuValidations.createMenu),
+    verifyToken,
+    verifyAdmin,
+    MenuController.createMenu
+);
 router.patch("/:id", verifyToken, verifyAdmin, MenuController.updateMenu);
 router.patch(
     "/image/:id",

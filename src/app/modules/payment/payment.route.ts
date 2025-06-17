@@ -2,6 +2,8 @@ import { Router } from "express";
 import { PaymentController } from "./payment.controller";
 import { verifyToken } from "../../middlewares/auth.middleware";
 import { verifyAdmin } from "../../middlewares/admin.middleware";
+import validateRequest from "../../middlewares/validateRequest";
+import { PaymentValidations } from "./payment.validation";
 
 const router = Router();
 
@@ -11,7 +13,12 @@ router.post(
     verifyToken,
     PaymentController.createPaymentIntent
 );
-router.post("/", verifyToken, PaymentController.createPayment);
+router.post(
+    "/",
+    validateRequest(PaymentValidations.createPayment),
+    verifyToken,
+    PaymentController.createPayment
+);
 router.get("/email/:email", verifyToken, PaymentController.getPaymentsByEmail);
 router.get("/", verifyToken, verifyAdmin, PaymentController.getAllPayments);
 router.get("/:id", verifyToken, PaymentController.getPaymentById);

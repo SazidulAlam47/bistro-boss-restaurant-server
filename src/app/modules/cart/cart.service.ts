@@ -19,7 +19,7 @@ const getAllCarts = async () => {
 };
 
 const deleteCartItem = async (id: string) => {
-    const query = { _id: new ObjectId(id) } as any;
+    const query = { _id: new ObjectId(id) };
     const result = await cartsCollection.deleteOne(query);
     return result;
 };

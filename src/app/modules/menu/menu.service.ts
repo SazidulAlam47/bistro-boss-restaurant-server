@@ -21,7 +21,7 @@ const getAllMenus = async (
 };
 
 const getMenuById = async (id: string) => {
-    const query = { _id: new ObjectId(id) } as any;
+    const query = { _id: new ObjectId(id) };
     const result = await menusCollection.findOne(query);
     return result;
 };
@@ -37,7 +37,7 @@ const createMenu = async (menu: IMenu) => {
 };
 
 const updateMenu = async (id: string, menu: Partial<IMenu>) => {
-    const filter = { _id: new ObjectId(id) } as any;
+    const filter = { _id: new ObjectId(id) };
     const updateDoc = {
         $set: {
             name: menu.name,
@@ -51,7 +51,7 @@ const updateMenu = async (id: string, menu: Partial<IMenu>) => {
 };
 
 const updateMenuImage = async (id: string, image: string) => {
-    const filter = { _id: new ObjectId(id) } as any;
+    const filter = { _id: new ObjectId(id) };
     const updateDoc = {
         $set: {
             image: image,
@@ -62,7 +62,7 @@ const updateMenuImage = async (id: string, image: string) => {
 };
 
 const deleteMenu = async (id: string) => {
-    const query = { _id: new ObjectId(id) } as any;
+    const query = { _id: new ObjectId(id) };
     const result = await menusCollection.deleteOne(query);
     return result;
 };

@@ -22,7 +22,7 @@ const createOrUpdateUser = async (user: IUser) => {
 };
 
 const updateUserRole = async (id: string, role: "user" | "admin") => {
-    const filter = { _id: new ObjectId(id) } as any;
+    const filter = { _id: new ObjectId(id) };
     const updateDoc = {
         $set: {
             role: role,
@@ -39,7 +39,7 @@ const checkAdmin = async (email: string) => {
 };
 
 const deleteUser = async (id: string) => {
-    const query = { _id: new ObjectId(id) } as any;
+    const query = { _id: new ObjectId(id) };
     const result = await userCollection.deleteOne(query);
     return result;
 };

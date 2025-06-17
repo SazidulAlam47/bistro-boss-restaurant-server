@@ -1,5 +1,7 @@
+import { ObjectId } from "mongodb";
+
 export interface IPayment {
-    _id?: string;
+    _id?: string | ObjectId;
     price: number;
     email: string;
     transactionId: string;
@@ -7,6 +9,4 @@ export interface IPayment {
     status: "pending" | "completed" | "cancelled";
     menuItems: string[];
     menuItemIds: string[];
-    createdAt?: string;
-    updatedAt?: string;
 }
