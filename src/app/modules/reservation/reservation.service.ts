@@ -29,6 +29,14 @@ const createReservation = async (
     if (!table) {
         throw new ApiError(404, "Table not found.");
     }
+    reservation.tableNumber = table.tableNumber;
+
+    if (reservation.numberOfGuests > table.seats) {
+        throw new ApiError(
+            409,
+            `Table only has ${table.seats} seats, but ${reservation.numberOfGuests} guests requested.`
+        );
+    }
 
     const possibleConflicts = await reservationCollection
         .find({

@@ -5,6 +5,7 @@ export interface Reservation {
     customerName: string;
     customerEmail: string;
     tableId: string;
+    tableNumber: string;
     reservationDate: Date;
     durationMinutes: number;
     numberOfGuests: number;
