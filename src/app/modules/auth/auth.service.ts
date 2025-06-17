@@ -1,8 +1,8 @@
 import jwt from "jsonwebtoken";
 import { config } from "../../config";
-import { IUser } from "./auth.interface";
+import { IDecodedUser } from "./auth.interface";
 
-const generateToken = (user: IUser): string => {
+const generateToken = (user: IDecodedUser): string => {
     return jwt.sign(user, config.jwt.secret, {
         expiresIn: config.jwt.expiresIn,
     });

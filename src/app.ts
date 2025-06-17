@@ -3,8 +3,8 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import { config } from "./app/config";
 import routes from "./app/routes";
-import { globalErrorHandler } from "./app/middlewares/error.middleware";
 import { notFound } from "./app/middlewares/notFound.middleware";
+import globalErrorHandler from "./app/middlewares/error.middleware";
 
 const app = express();
 

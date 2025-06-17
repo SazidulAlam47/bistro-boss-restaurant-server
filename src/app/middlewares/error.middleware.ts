@@ -1,12 +1,24 @@
-import { Request, Response, NextFunction } from "express";
+/* eslint-disable no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { config } from "../config";
+import { ErrorRequestHandler } from "express";
+import { ZodError } from "zod";
 
-export const globalErrorHandler = (
-    err: any,
-    req: Request,
-    res: Response,
-    next: NextFunction
-) => {
-    res.status(500).json({
-        message: "Something went wrong!",
+const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
+    let statusCode: number = err?.statusCode || 500;
+    let message: string = err?.message || "Something went wrong";
+    let error = err;
+
+    if (err instanceof ZodError) {
+        statusCode = 422;
+        message = "Validation Error";
+    }
+
+    res.status(statusCode).json({
+        message,
+        error,
+        stack: config.NODE_ENV === "development" ? err?.stack : undefined,
     });
 };
+
+export default globalErrorHandler;

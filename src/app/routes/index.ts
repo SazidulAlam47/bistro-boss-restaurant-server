@@ -6,6 +6,7 @@ import paymentRoutes from "../modules/payment/payment.route";
 import adminRoutes from "../modules/admin/admin.route";
 import authRoutes from "../modules/auth/auth.route";
 import tableRoutes from "../modules/table/table.route";
+import { ReservationRoutes } from "../modules/reservation/reservation.route";
 
 const router = Router();
 
@@ -37,6 +38,10 @@ const moduleRoutes = [
     {
         path: "/tables",
         route: tableRoutes,
+    },
+    {
+        path: "/reservations",
+        route: ReservationRoutes,
     },
 ];
 

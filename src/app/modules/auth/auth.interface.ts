@@ -1,7 +1,6 @@
-export interface IUser {
-    name: string;
+import { JwtPayload } from "jsonwebtoken";
+export interface IDecodedUser extends JwtPayload {
     email: string;
-    image?: string;
 }
 
 export interface ITokenResponse {
