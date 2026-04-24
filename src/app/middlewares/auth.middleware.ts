@@ -6,7 +6,7 @@ import { IJwtPayload } from "../interfaces/jwt.interface";
 export const verifyToken = async (
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
 ) => {
     const token = req.cookies?.token;
     console.log("Verifying token", token);

@@ -10,6 +10,10 @@ export const config = {
     port: process.env.PORT,
     database: {
         uri: process.env.DATABASE_URI as string,
+        dnsServers: (process.env.DNS_SERVERS || "")
+            .split(",")
+            .map((value) => value.trim())
+            .filter(Boolean),
         options: {
             serverApi: {
                 version: "1",

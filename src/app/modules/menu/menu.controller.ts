@@ -32,6 +32,21 @@ const getMenusCount = catchAsync(async (req: Request, res: Response) => {
     res.send({ count });
 });
 
+const getRecommendedMenus = catchAsync(async (req: Request, res: Response) => {
+    const result = await MenuService.getRecommendedMenus();
+    res.send(result);
+});
+
+const getOfferedMenus = catchAsync(async (req: Request, res: Response) => {
+    const result = await MenuService.getOfferedMenus();
+    res.send(result);
+});
+
+const getPopularMenus = catchAsync(async (req: Request, res: Response) => {
+    const result = await MenuService.getPopularMenus();
+    res.send(result);
+});
+
 const createMenu = catchAsync(async (req: Request, res: Response) => {
     const menu = req.body;
     const result = await MenuService.createMenu(menu);
@@ -62,6 +77,9 @@ export const MenuController = {
     getAllMenus,
     getMenuById,
     getMenusCount,
+    getRecommendedMenus,
+    getOfferedMenus,
+    getPopularMenus,
     createMenu,
     updateMenu,
     updateMenuImage,

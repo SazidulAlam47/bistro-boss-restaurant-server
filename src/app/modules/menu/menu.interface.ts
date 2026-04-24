@@ -5,4 +5,7 @@ export interface IMenu {
     image: string;
     category: string;
     price: number;
+    isRecommended: boolean;
+    isOffered: boolean;
+    isPopular: boolean;
 }
