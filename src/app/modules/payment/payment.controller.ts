@@ -55,8 +55,10 @@ const updatePaymentStatus = catchAsync(async (req: Request, res: Response) => {
     res.send(result);
 });
 
-const getPaymentStats = catchAsync(async (req: Request, res: Response) => {
-    const result = await PaymentService.getPaymentStats();
+const createPaymentByBot = catchAsync(async (req: Request, res: Response) => {
+    const signature = req.headers["x-bot-api-key"] as string;
+    const payment = req.body;
+    const result = await PaymentService.createPaymentByBot(signature, payment);
     res.send(result);
 });
 
@@ -68,5 +70,5 @@ export const PaymentController = {
     getPaymentById,
     getOrderItems,
     updatePaymentStatus,
-    getPaymentStats,
+    createPaymentByBot,
 };

@@ -12,6 +12,7 @@ router.post(
     PaymentController.createPaymentIntent,
 );
 router.post("/", verifyToken, PaymentController.createPayment);
+router.post("/create-by-bot", PaymentController.createPaymentByBot);
 router.get("/email/:email", verifyToken, PaymentController.getPaymentsByEmail);
 router.get("/", verifyToken, verifyAdmin, PaymentController.getAllPayments);
 router.get("/:id", verifyToken, PaymentController.getPaymentById);

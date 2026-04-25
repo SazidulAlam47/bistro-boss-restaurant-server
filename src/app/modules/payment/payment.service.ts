@@ -49,7 +49,7 @@ const getOrderItems = async (orderId: string) => {
 
 const updatePaymentStatus = async (
     id: string,
-    status: "pending" | "completed" | "cancelled"
+    status: "pending" | "completed" | "cancelled",
 ) => {
     const filter = { _id: new ObjectId(id) };
     const updateDoc = {
@@ -67,6 +67,15 @@ const deletePayment = async (id: string) => {
     return result;
 };
 
+const createPaymentByBot = async (signature: string, payment: IPayment) => {
+    const token = process.env.BOT_API_KEY || "";
+    if (signature !== token) {
+        throw new Error("Invalid bot signature");
+    }
+    const result = await paymentCollection.insertOne(payment);
+    return result;
+};
+
 export const PaymentService = {
     createPayment,
     getPaymentsByEmail,
@@ -75,4 +84,5 @@ export const PaymentService = {
     getOrderItems,
     updatePaymentStatus,
     deletePayment,
+    createPaymentByBot,
 };
