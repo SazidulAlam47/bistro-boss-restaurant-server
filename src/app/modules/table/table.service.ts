@@ -10,7 +10,7 @@ const createTable = async (table: ITable) => {
 const updateTable = async (id: string, data: Partial<ITable>) => {
     const result = await tableCollection.updateOne(
         { _id: new ObjectId(id) },
-        { $set: data }
+        { $set: data },
     );
     return result;
 };

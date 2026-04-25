@@ -7,6 +7,8 @@ const router = Router();
 
 router.post("/", verifyToken, ReservationController.createReservation);
 
+router.post("/create-by-bot", ReservationController.createReservationByBot);
+
 router.get(
     "/",
     verifyToken,

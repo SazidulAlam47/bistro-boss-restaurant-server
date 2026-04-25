@@ -7,7 +7,7 @@ const createReservation = catchAsync(async (req: Request, res: Response) => {
     const reservation = req.body;
     const result = await ReservationService.createReservation(
         reservation,
-        user
+        user,
     );
     res.send(result);
 });
@@ -23,8 +23,21 @@ const getMyReservations = catchAsync(async (req: Request, res: Response) => {
     res.send(result);
 });
 
+const createReservationByBot = catchAsync(
+    async (req: Request, res: Response) => {
+        const signature = req.headers["x-bot-api-key"] as string;
+        const reservation = req.body;
+        const result = await ReservationService.createReservationByBot(
+            signature,
+            reservation,
+        );
+        res.send(result);
+    },
+);
+
 export const ReservationController = {
     createReservation,
     getAllReservations,
     getMyReservations,
+    createReservationByBot,
 };

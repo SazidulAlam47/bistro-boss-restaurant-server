@@ -8,12 +8,12 @@ import userCollection from "../user/user.model";
 
 const createReservation = async (
     reservation: Omit<Reservation, "id">,
-    decodedUser: IDecodedUser
+    decodedUser: IDecodedUser,
 ) => {
     const reservationDate = new Date(reservation.reservationDate);
     const duration = reservation.durationMinutes;
     const reservationEnd = new Date(
-        reservationDate.getTime() + duration * 60000
+        reservationDate.getTime() + duration * 60000,
     );
 
     const user = await userCollection.findOne({ email: decodedUser.email });
@@ -34,7 +34,7 @@ const createReservation = async (
     if (reservation.numberOfGuests > table.seats) {
         throw new ApiError(
             409,
-            `Table only has ${table.seats} seats, but ${reservation.numberOfGuests} guests requested.`
+            `Table only has ${table.seats} seats, but ${reservation.numberOfGuests} guests requested.`,
         );
     }
 
@@ -53,7 +53,7 @@ const createReservation = async (
     if (hasConflict) {
         throw new ApiError(
             409,
-            "Table is already booked for the selected time range."
+            "Table is already booked for the selected time range.",
         );
     }
     const doc = {
@@ -65,15 +65,72 @@ const createReservation = async (
 };
 
 const getAllReservations = async () => {
-    return reservationCollection.find().toArray();
+    return reservationCollection.find().sort({ reservationDate: -1 }).toArray();
 };
 
 const getReservationsByEmail = async (email: string) => {
     return reservationCollection.find({ customerEmail: email }).toArray();
 };
 
+const createReservationByBot = async (
+    signature: string,
+    reservation: Omit<Reservation, "id">,
+) => {
+    const token = process.env.BOT_API_KEY || "";
+    if (signature !== token) {
+        throw new Error("Invalid bot signature");
+    }
+
+    const reservationDate = new Date(reservation.reservationDate);
+    const duration = reservation.durationMinutes;
+    const reservationEnd = new Date(
+        reservationDate.getTime() + duration * 60000,
+    );
+
+    const table = await tableCollection.findOne({
+        _id: new ObjectId(reservation.tableId),
+    });
+    if (!table) {
+        throw new ApiError(404, "Table not found.");
+    }
+    reservation.tableNumber = table.tableNumber;
+
+    if (reservation.numberOfGuests > table.seats) {
+        throw new ApiError(
+            409,
+            `Table only has ${table.seats} seats, but ${reservation.numberOfGuests} guests requested.`,
+        );
+    }
+
+    const possibleConflicts = await reservationCollection
+        .find({
+            tableId: reservation.tableId,
+            reservationDate: { $lt: reservationEnd },
+        })
+        .toArray();
+
+    const hasConflict = possibleConflicts.some((r) => {
+        const rEnd =
+            new Date(r.reservationDate).getTime() + r.durationMinutes * 60000;
+        return rEnd > reservationDate.getTime();
+    });
+    if (hasConflict) {
+        throw new ApiError(
+            409,
+            "Table is already booked for the selected time range.",
+        );
+    }
+    const doc = {
+        ...reservation,
+        reservationDate: reservationDate,
+    };
+    const result = await reservationCollection.insertOne(doc);
+    return result;
+};
+
 export const ReservationService = {
     createReservation,
     getAllReservations,
     getReservationsByEmail,
+    createReservationByBot,
 };
