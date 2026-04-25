@@ -39,7 +39,10 @@ const getOrderItems = async (orderId: string) => {
     const menuItems = await menuCollection
         .find({
             _id: {
-                $in: payment.menuItemIds.map((id) => new ObjectId(id)),
+                $in: (Array.isArray(payment.menuItemIds)
+                    ? payment.menuItemIds
+                    : [payment.menuItemIds]
+                ).map((id) => new ObjectId(id)),
             },
         })
         .toArray();
@@ -72,7 +75,13 @@ const createPaymentByBot = async (signature: string, payment: IPayment) => {
     if (signature !== token) {
         throw new Error("Invalid bot signature");
     }
-    const result = await paymentCollection.insertOne(payment);
+
+    const orderData = {
+        ...payment,
+        menuItemIds: JSON.parse(payment.menuItemIds as string),
+    };
+
+    const result = await paymentCollection.insertOne(orderData);
     return result;
 };
 
