@@ -69,7 +69,10 @@ const getAllReservations = async () => {
 };
 
 const getReservationsByEmail = async (email: string) => {
-    return reservationCollection.find({ customerEmail: email }).toArray();
+    return reservationCollection
+        .find({ customerEmail: email })
+        .sort({ reservationDate: -1 })
+        .toArray();
 };
 
 const createReservationByBot = async (
@@ -81,7 +84,10 @@ const createReservationByBot = async (
         throw new Error("Invalid bot signature");
     }
 
-    const reservationDate = new Date(reservation.reservationDate);
+    // subtract 6h from the reservationDate
+    const reservationDate = new Date(
+        new Date(reservation.reservationDate).getTime() - 6 * 60 * 60 * 1000,
+    );
     const duration = reservation.durationMinutes;
     const reservationEnd = new Date(
         reservationDate.getTime() + duration * 60000,
