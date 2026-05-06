@@ -5,7 +5,7 @@ import catchAsync from "../../utils/catchAsync";
 const getAllMenus = catchAsync(async (req: Request, res: Response) => {
     const page = parseInt(req.query?.page as string);
     const size = parseInt(req.query?.size as string);
-    const category = req.query?.category as string;
+    const category = (req.query?.category as string)?.toLowerCase();
 
     let filter = {};
     if (category) {
@@ -23,7 +23,7 @@ const getMenuById = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getMenusCount = catchAsync(async (req: Request, res: Response) => {
-    const category = req.query?.category as string;
+    const category = (req.query?.category as string)?.toLowerCase();
     let filter = {};
     if (category) {
         filter = { category };
